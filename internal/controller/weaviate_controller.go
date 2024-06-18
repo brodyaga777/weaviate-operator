@@ -24,6 +24,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -118,8 +119,15 @@ func (r *WeaviateReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	// mark weaviate as ready
 	if sts.Status.ReadyReplicas == db.Spec.Replicas {
+		cond := metav1.Condition{
+			Type:    "Ready",
+			Status:  metav1.ConditionTrue,
+			Reason:  "Ready",
+			Message: "The application is ready",
+		}
+		meta.SetStatusCondition(&db.Status.Conditions, cond)
 		db.Status.Ready = true
-		err = r.Update(ctx, &db)
+		err = r.Status().Update(ctx, &db)
 		if err != nil {
 			logger.Error(err, "failed to updated weaviate status", "instance", db.Name)
 		}
