@@ -4,20 +4,20 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.14.0
-  name: weavites.db.weaviate.io
+  name: weaviates.db.weaviate.io
 spec:
   group: db.weaviate.io
   names:
-    kind: Weavite
-    listKind: WeaviteList
-    plural: weavites
-    singular: weavite
+    kind: Weaviate
+    listKind: WeaviateList
+    plural: weaviates
+    singular: weaviate
   scope: Namespaced
   versions:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: Weavite is the Schema for the weavites API
+        description: Weaviate is the Schema for the weaviates API
         properties:
           apiVersion:
             description: |-
@@ -37,8 +37,11 @@ spec:
           metadata:
             type: object
           spec:
-            description: WeaviteSpec defines the desired state of Weavite
+            description: WeaviateSpec defines the desired state of Weaviate
             properties:
+              enableGRPCService:
+                description: 'TODO: maybe gRPCService.<>'
+                type: boolean
               replicas:
                 format: int32
                 type: integer
@@ -99,7 +102,7 @@ spec:
                 type: object
             type: object
           status:
-            description: WeaviteStatus defines the observed state of Weavite
+            description: WeaviateStatus defines the observed state of Weaviate
             properties:
               conditions:
                 items:
