@@ -20,6 +20,7 @@ WIP, do not use in production, operator currently in development
 - [x] configure liveness/readiness probes
 - [ ] support service type LoadBalancer
 - [ ] support monitoring configuration
+- [ ] implement status holder structure (or deployment get)
 
 ## Getting Started
 

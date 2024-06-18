@@ -38,6 +38,7 @@ type WeaviateSpec struct {
 type WeaviateStatus struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=status
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`
+	Ready      bool               `json:"ready"`
 }
 
 //+kubebuilder:object:root=true
