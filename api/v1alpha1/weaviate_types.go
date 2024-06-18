@@ -35,6 +35,7 @@ type WeaviateSpec struct {
 }
 
 // WeaviateStatus defines the observed state of Weaviate
+// +k8s:openapi-gen=true
 type WeaviateStatus struct {
 	// +operator-sdk:csv:customresourcedefinitions:type=status
 	Conditions []metav1.Condition `json:"conditions,omitempty" patchStrategy:"merge" patchMergeKey:"type" protobuf:"bytes,1,rep,name=conditions"`

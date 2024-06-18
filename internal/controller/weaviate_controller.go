@@ -77,13 +77,6 @@ func (r *WeaviateReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 
 	// TODO: handle deletion
 
-	// process statefulset configuration
-	err = r.reconcileStatefulSet(ctx, db)
-	if err != nil {
-		logger.Error(err, "failed to reconcile weaviate sts")
-		return ctrl.Result{}, err
-	}
-
 	// process gRPC service
 	logger.Info(
 		"reconciling gRPC service",
@@ -115,6 +108,24 @@ func (r *WeaviateReconciler) Reconcile(ctx context.Context, req ctrl.Request) (c
 		return ctrl.Result{}, err
 	}
 	logger.Info("secret configuration reconciled", "instance", db.Name)
+
+	// process statefulset configuration
+	sts, err := r.reconcileStatefulSet(ctx, db)
+	if err != nil {
+		logger.Error(err, "failed to reconcile weaviate sts")
+		return ctrl.Result{}, err
+	}
+
+	// mark weaviate as ready
+	if sts.Status.ReadyReplicas == db.Spec.Replicas {
+		db.Status.Ready = true
+		err = r.Update(ctx, &db)
+		if err != nil {
+			logger.Error(err, "failed to updated weaviate status", "instance", db.Name)
+		}
+	}
+
+	logger.Info("reconciled statefulset", "instance", sts.ObjectMeta.Name)
 
 	logger.Info("reconciling completed for weaviate instance", "name", db.GetName())
 
@@ -181,7 +192,7 @@ func (r *WeaviateReconciler) createSecret(ctx context.Context, db dbv1alpha1.Wea
 	return secret, nil
 }
 
-func (r *WeaviateReconciler) reconcileStatefulSet(ctx context.Context, db dbv1alpha1.Weaviate) error {
+func (r *WeaviateReconciler) reconcileStatefulSet(ctx context.Context, db dbv1alpha1.Weaviate) (*appsv1.StatefulSet, error) {
 	logger := log.FromContext(ctx)
 
 	// get sts
@@ -198,19 +209,25 @@ func (r *WeaviateReconciler) reconcileStatefulSet(ctx context.Context, db dbv1al
 		wv, err := r.createStatefulSet(ctx, db)
 		if err != nil {
 			logger.Error(err, "errprovision")
-			return err
+			return nil, err
 		}
 		println(wv)
 	}
 
 	if err != nil && !errors.IsNotFound(err) {
 		logger.Error(err, "failed to retrieve stateful set")
-		return err
+		return nil, err
 	}
 
 	// TODO: implement update func? first easily start from service
 
-	return nil
+	err = r.Get(ctx, client.ObjectKey{Namespace: db.Namespace, Name: db.Name}, sts)
+	if err != nil {
+		logger.Error(err, "failed to retrieve weaviate statefulset", "instance", db.Name)
+		return nil, err
+	}
+
+	return sts, nil
 }
 
 func (r *WeaviateReconciler) reconcileGRPCService(ctx context.Context, db dbv1alpha1.Weaviate) (*corev1.Service, error) {
