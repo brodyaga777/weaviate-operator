@@ -1,0 +1,31 @@
+# permissions for end users to edit weaviates.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: weaviate-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: weaviate-operator
+    app.kubernetes.io/part-of: weaviate-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: weaviate-editor-role
+rules:
+- apiGroups:
+  - db.weaviate.io
+  resources:
+  - weaviates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - db.weaviate.io
+  resources:
+  - weaviates/status
+  verbs:
+  - get
